@@ -1,0 +1,39 @@
+<?php
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Include the database connection
+require $_SERVER["DOCUMENT_ROOT"] . '/expertsystem-psychologist/config/database.php';
+
+// Function to get results by user ID
+function getResultsByUserId($conn, $userid) {
+    // Prepare and bind the query
+    $stmt = $conn->prepare("SELECT * FROM result WHERE user_id = ?");
+    $stmt->bind_param("i", $userid);
+
+    // Execute the query
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    // Close the prepared statement
+    $stmt->close();
+
+    return $result;
+}
+
+// Check if the 'user_id' is set in the session
+if (isset($_SESSION['fk-user-id'])) {
+    // Get the user ID from the session
+    $userid = $_SESSION['fk-user-id'];
+
+    // Get results for the user
+    $result = getResultsByUserId($conn, $userid);
+
+    // Close the database connection
+    $conn->close();
+} else {
+    // Handle the case when 'fk-user-id' is not set in the session
+    echo "User ID not found in the session";
+}
+?>
